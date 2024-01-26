@@ -1,13 +1,11 @@
 import 'dotenv/config';
 import express from "express";
 
+import { routes } from './routes';
+
 const app = express();
 
-app.get('/', (req, res) => {
-  return res.json({
-    project: 'Nlw Ecoleta',
-    Dev: 'Adrian'
-  })
-})
+app.use(express.json());
+app.use(routes);
 
-app.listen(process.env.PORT)
+app.listen(process.env.PORT, () => console.log('🚀 Server in air!'))
