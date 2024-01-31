@@ -1,14 +1,9 @@
-import { PrismaClient } from "@prisma/client";
-import { Router, Response } from "express";
+import { Router } from "express";
 
-const prisma = new PrismaClient();
+import { ItemsController } from "./controllers/itemsController";
 
 export const routes = Router();
 
-routes.get('/', async (req, res: Response) => {
-  const items = await prisma.item.findMany();
+const itemsController = new ItemsController();
 
-  return res.json({
-    items
-  })
-});
+routes.get('/items', itemsController.index);
