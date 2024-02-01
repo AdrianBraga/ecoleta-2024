@@ -30,7 +30,7 @@ export class PointsController {
       items
     } = createPointBodySchema.parse(request.body)
 
-    await prisma.point.create({
+    const { id } = await prisma.point.create({
       data: {
         image: 'image-fake',
         name,
@@ -41,6 +41,18 @@ export class PointsController {
         city,
         uf
       }
+    });
+
+    const pointItem = items
+      .map((item_id: number) => {
+        return {
+          item_id,
+          point_id: id
+        }
+      })
+
+    await prisma.pointItem.createMany({
+      data: pointItem
     });
 
     return response.status(201).send();
