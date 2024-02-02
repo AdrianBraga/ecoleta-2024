@@ -57,4 +57,72 @@ export class PointsController {
 
     return response.status(201).send();
   }
+
+  async index(request: Request, response: Response) {
+    const getPointsQuerySchema = z.object({
+      city: z.string().optional(),
+      uf: z.string().optional(),
+      items: z.string().optional(),
+    });
+
+    const { city, uf, items } = getPointsQuerySchema.parse(request.query);
+
+    const parsedItems = items?.split(',')
+      .map(item => Number(item.trim()))
+
+    const points = await prisma.point.findMany({
+      where: {
+        city,
+        uf,
+        PointItem: {
+          some: {
+            item_id: {
+              in: parsedItems,
+            }
+          }
+        }
+      }
+    })
+
+    return response.json(points)
+  }
+
+  async show(request: Request, response: Response) {
+    const getPointParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    const { id } = getPointParamsSchema.parse(request.params);
+
+    const point = await prisma.point.findFirst({
+      where: {
+        id
+      }
+    })
+
+    if (!point) {
+      return response.status(400).json({
+        error: true,
+        message: 'Point not found!'
+      })
+    }
+
+    const item = await prisma.item.findMany({
+      where: {
+        PointItem: {
+          some: {
+            point_id: id
+          }
+        }
+      },
+      select: {
+        title: true
+      }
+    })
+
+    return response.json({
+      point,
+      item
+    })
+  }
 }
